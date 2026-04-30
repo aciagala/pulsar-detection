@@ -30,22 +30,21 @@ SEED = 42
 # Data & Preprocessing
 # ---------------------------------------------------------------------------
 
-TARGET_COLUMN = "Class"
+TARGET_COLUMN = "target_class"
 
 # Fraction of training data used for validation
 VAL_SIZE = 0.2
 
 # Features in order as they appear in the CSV
-FEATURE_COLUMNS = [
-    "Mean of the integrated profile",
-    "Standard deviation of the integrated profile",
-    "Excess kurtosis of the integrated profile",
-    "Skewness of the integrated profile",
-    "Mean of the DM-SNR curve",
-    "Standard deviation of the DM-SNR curve",
-    "Excess kurtosis of the DM-SNR curve",
-    "Skewness of the DM-SNR curve",
-]
+FEATURE_COLUMNS = [' Mean of the integrated profile',
+                   ' Standard deviation of the integrated profile',
+                   ' Excess kurtosis of the integrated profile',
+                   ' Skewness of the integrated profile',
+                   ' Mean of the DM-SNR curve',
+                   ' Standard deviation of the DM-SNR curve',
+                   ' Excess kurtosis of the DM-SNR curve',
+                   ' Skewness of the DM-SNR curve']
+
 
 # ---------------------------------------------------------------------------
 # DataLoader
