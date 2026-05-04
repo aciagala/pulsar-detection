@@ -1,4 +1,5 @@
 from pathlib import Path
+import torch
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -52,7 +53,7 @@ FEATURE_COLUMNS = [' Mean of the integrated profile',
 
 BATCH_SIZE = 64
 NUM_WORKERS = 0  # set to 0 if on Windows or debugging
-PIN_MEMORY = True  # speeds up CPU→GPU transfer when using a GPU
+PIN_MEMORY = torch.cuda.is_available()
 
 # ---------------------------------------------------------------------------
 # Model Architecture
@@ -81,7 +82,7 @@ NUM_EPOCHS = 100
 PATIENCE = 10
 
 # Classification threshold applied to sigmoid outputs during evaluation
-THRESHOLD = 0.5
+THRESHOLD = 0.8
 
 # ---------------------------------------------------------------------------
 # Class Imbalance
