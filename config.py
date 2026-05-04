@@ -51,7 +51,7 @@ FEATURE_COLUMNS = [' Mean of the integrated profile',
 # ---------------------------------------------------------------------------
 
 BATCH_SIZE = 64
-NUM_WORKERS = 2  # set to 0 if on Windows or debugging
+NUM_WORKERS = 0  # set to 0 if on Windows or debugging
 PIN_MEMORY = True  # speeds up CPU→GPU transfer when using a GPU
 
 # ---------------------------------------------------------------------------
