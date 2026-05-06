@@ -42,11 +42,17 @@ def _report(df: pd.DataFrame, name: str) -> None:
         print(f"\n[i] Class distribution:\n{counts.to_string()}")
         print(f"    Pulsar ratio: {ratio:.2%}  →  pos_weight ≈ {counts.get(0, 1) / counts.get(1, 1):.2f}")
 
+# DOADJE DODATKOWĄ CECHĘ "filled_with_median"
+
+def AddFeatureFilledWithMedians( Raw_DataFrame ):
+    Raw_DataFrame[config.MARK_COLUMN_NAME] = Raw_DataFrame.isnull().any( axis = 1 ) .astype(int);
 
 # PREPROCESSING +---------------------------------------------------------------------------------------
 
 # OBLICZA STOSUNEK PULSARÓW DO SZUMU (DO PODZIELENIA BATCH'Y)
 def compute_pos_weight(y_train: np.ndarray) -> torch.Tensor:
+    if config.IMBALANCE_STRATEGY == "sampler" and config.REPEAT_SAMPLES == True:
+        return torch.tensor([1]);
     if config.POS_WEIGHT_OVERRIDE is not None:
         w = float(config.POS_WEIGHT_OVERRIDE)
         print(f'[i] Using manual pos_weight: {w:.4f}')
@@ -66,6 +72,10 @@ def run_preprocessing() -> dict:
     _report(test_df, "test.csv")
 
     feature_cols = config.FEATURE_COLUMNS # USTALA CECHY
+
+    if( config.MARK_FILLED_SAMPLES ):
+        AddFeatureFilledWithMedians( train_df );
+        AddFeatureFilledWithMedians( test_df );
 
     X_raw = train_df[feature_cols].values.astype(np.float32)
     y = train_df[config.TARGET_COLUMN].values.astype(np.float32)

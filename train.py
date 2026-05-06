@@ -47,6 +47,7 @@ def main() -> None:
         data["X_val"],   data["y_val"],
     )
 
+
     # MODEL +----------------------------------------------------------------
     # za pomocą PulsarMLP z src/model/mlp
 

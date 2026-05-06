@@ -16,7 +16,7 @@ PROCESSED_DIR = DATA_DIR / "processed"
 TRAIN_PATH = RAW_DIR / "train.csv"
 TEST_PATH = RAW_DIR / "test.csv"
 
-OUTPUTS_DIR = ROOT_DIR / "outputs"
+OUTPUTS_DIR = ROOT_DIR / "outputs_ninth_testing"
 USED_CONFIGS_DIR = OUTPUTS_DIR / "configs"
 CHECKPOINTS_DIR = OUTPUTS_DIR / "checkpoints"
 PLOTS_DIR = OUTPUTS_DIR / "plots"
@@ -35,6 +35,9 @@ SEED = 67
 
 TARGET_COLUMN = "target_class"
 
+MARK_FILLED_SAMPLES = True
+MARK_COLUMN_NAME = 'filled_with_median'
+
 # UŁAMEK DANYCH TRENINGOWYCH UŻYWANY DO VALIDACJI
 VAL_SIZE = 0.2
 
@@ -48,6 +51,8 @@ FEATURE_COLUMNS = [' Mean of the integrated profile',
                    ' Excess kurtosis of the DM-SNR curve',
                    ' Skewness of the DM-SNR curve']
 
+if( MARK_FILLED_SAMPLES ):
+    FEATURE_COLUMNS.append(MARK_COLUMN_NAME)
 
 # DATALOADER +---------------------------------------------------------------
 
@@ -79,7 +84,7 @@ WEIGHT_DECAY = 1e-4  # L2 regularisation passed to Adam
 
 NUM_EPOCHS = 100 # LICZBA EPOK
 
-PATIENCE = 10 # ILOŚĆ EPOK PRZEZ KTÓRE LOSS MOŻE SIĘ POGARSZAĆ
+PATIENCE = 20 # ILOŚĆ EPOK PRZEZ KTÓRE LOSS MOŻE SIĘ POGARSZAĆ
 
 THRESHOLD = 0.8 # TRESHOLD POWYŻEJ KTÓREGO OBIEKT JEST UZNAWANY ZA PULSAR
 
@@ -88,7 +93,7 @@ THRESHOLD = 0.8 # TRESHOLD POWYŻEJ KTÓREGO OBIEKT JEST UZNAWANY ZA PULSAR
 
 # Strategy: "pos_weight" (loss weighting) | "sampler" (WeightedRandomSampler)
 # Both address imbalance; "pos_weight" is simpler, "sampler" changes batch composition.
-IMBALANCE_STRATEGY = "pos_weight"
+IMBALANCE_STRATEGY = "sampler"
 
 # pos_weight is computed automatically from the training set in preprocessing.py,
 # but you can override it manually here (set to None for auto).
