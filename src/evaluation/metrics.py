@@ -1,3 +1,4 @@
+# IMPORTOWANIE BIBLIOTEK
 import numpy as np
 import torch
 import torch.nn as nn
@@ -6,12 +7,11 @@ from sklearn.metrics import (
     f1_score, precision_score, recall_score,
     roc_auc_score, confusion_matrix, classification_report,
 )
+# CONFIG
 import config
 
 
-# ---------------------------------------------------------------------------
-# Full evaluation on a loader
-# ---------------------------------------------------------------------------
+# EWALUACJA MODELU +---------------------------------------------------------------
 
 @torch.no_grad()
 def evaluate_model(
@@ -76,9 +76,7 @@ def evaluate_model(
     }
 
 
-# ---------------------------------------------------------------------------
-# Threshold tuning
-# ---------------------------------------------------------------------------
+# USTAWIANIE NAJLEPSZEGO TRESHOLD +-------------------------------------------------
 
 def find_best_threshold(y_true: np.ndarray, y_probs: np.ndarray) -> tuple[float, float]:
     """
@@ -101,9 +99,7 @@ def find_best_threshold(y_true: np.ndarray, y_probs: np.ndarray) -> tuple[float,
     return round(best_thresh, 2), best_f1
 
 
-# ---------------------------------------------------------------------------
-# Pretty print
-# ---------------------------------------------------------------------------
+# PRINT +-----------------------------------------------------------------------
 
 def print_metrics(metrics: dict, split: str = "Validation") -> None:
     tn, fp, fn, tp = metrics["confusion"].ravel()

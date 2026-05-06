@@ -1,19 +1,18 @@
+# IMPORTOWANIE BIBLIOTEK
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
+# CONFIG
 import config
 
 
-# ---------------------------------------------------------------------------
-# Dataset
-# ---------------------------------------------------------------------------
+
+# KLASA DATASET +------------------------------------------------------------------
+# za pomocą torch.utils.data.Dataset
 
 class PulsarDataset(Dataset):
-    """
-    Wraps numpy arrays into a PyTorch Dataset.
-    y is optional — omit it for the test set (inference only).
-    """
 
+    # INICJALIZACJA DWOMA np.ndarray WCZYWYWANYMI Z EXCELA
     def __init__(self, X: np.ndarray, y: np.ndarray | None = None):
         self.X = torch.tensor(X, dtype=torch.float32)
         self.y = torch.tensor(y, dtype=torch.float32) if y is not None else None
@@ -27,9 +26,10 @@ class PulsarDataset(Dataset):
         return self.X[idx]
 
 
-# ---------------------------------------------------------------------------
-# WeightedRandomSampler  (used when IMBALANCE_STRATEGY == "sampler")
-# ---------------------------------------------------------------------------
+
+# WEIGHTEDRANDOMSAMPLER  +-----------------------------------------------------------
+# ( używany przy strategii IMBALANCESTRATEGY = "sampler" )
+# za pomocą torch.utils.data.WeightedRandomSampler
 
 def _make_sampler(y: np.ndarray) -> WeightedRandomSampler:
     """
@@ -37,20 +37,18 @@ def _make_sampler(y: np.ndarray) -> WeightedRandomSampler:
     This makes the DataLoader draw roughly equal numbers of pulsars and non-pulsars
     per batch, regardless of the original imbalance.
     """
-    class_counts = np.bincount(y.astype(int))          # [n_class0, n_class1]
-    class_weights = 1.0 / class_counts                 # rarer class → higher weight
-    sample_weights = class_weights[y.astype(int)]      # one weight per sample
+    class_counts = np.bincount(y.astype(int))          # LICZBA PULSARÓW I SZUMÓW
+    class_weights = 1.0 / class_counts                 # PRZYPISUJE SZANSĘ NA WYLOSOWANIE PULSAROM I SZUMOM
+    sample_weights = class_weights[y.astype(int)]      # PRZYPISUJE ODPOWIEDNIĄ WAGĘ KAŻDEJ PRÓBCE
 
-    return WeightedRandomSampler(
+    return WeightedRandomSampler( #LOSUJE PRÓBKI WEDŁUG PRAWDOPODOBIEŃSTW - NADAJE IM KOLEJNOŚĆ
         weights=torch.tensor(sample_weights, dtype=torch.float32),
         num_samples=len(sample_weights),
-        replacement=True,
+        replacement=config.REPEAT_SAMPLES, # UWAGA! replacement = True OZNACZA ŻE PRÓBKI MOGĄ SIĘ POWTARZAĆ
     )
 
 
-# ---------------------------------------------------------------------------
-# DataLoader factory
-# ---------------------------------------------------------------------------
+# DATALOADER +--------------------------------------------------------------
 
 def get_dataloaders(
     X_train: np.ndarray,
@@ -68,18 +66,20 @@ def get_dataloaders(
     train_dataset = PulsarDataset(X_train, y_train)
     val_dataset   = PulsarDataset(X_val,   y_val)
 
-    # -- train loader --
+    # DATALOADER ŁADUJE BATCH'E WEDŁUG RÓŻNYCH STRATEGII
+    # "sampler"  - DO KAŻDEGO BATCHA 
+    # default    - MIESZA DANE STANDARDOWO
     if config.IMBALANCE_STRATEGY == "sampler":
         sampler = _make_sampler(y_train)
         train_loader = DataLoader(
             train_dataset,
             batch_size=config.BATCH_SIZE,
-            sampler=sampler,            # mutually exclusive with shuffle=True
+            sampler=sampler,            # wyklucza shuffle = True
             num_workers=config.NUM_WORKERS,
             pin_memory=config.PIN_MEMORY,
         )
     else:
-        # "pos_weight" strategy — just shuffle normally
+        # "pos_weight" / default
         train_loader = DataLoader(
             train_dataset,
             batch_size=config.BATCH_SIZE,
@@ -88,7 +88,7 @@ def get_dataloaders(
             pin_memory=config.PIN_MEMORY,
         )
 
-    # -- val loader --  (never shuffle, never resample)
+    # ŁADUJE ZBIÓR WALIDACYJNY - brak mieszania danych
     val_loader = DataLoader(
         val_dataset,
         batch_size=config.BATCH_SIZE,
@@ -100,7 +100,7 @@ def get_dataloaders(
     _report(train_loader, val_loader, y_train, y_val)
     return train_loader, val_loader
 
-
+# ZWRACA DATALOADER Z DANYMI Z config
 def get_test_loader(X_test: np.ndarray) -> DataLoader:
     """
     Build a DataLoader for the test set (no labels).
@@ -115,9 +115,7 @@ def get_test_loader(X_test: np.ndarray) -> DataLoader:
     )
 
 
-# ---------------------------------------------------------------------------
-# Sanity report
-# ---------------------------------------------------------------------------
+# Sanity report +------------------------------------------------------------
 
 def _report(
     train_loader: DataLoader,
@@ -141,9 +139,7 @@ def _report(
     print(f"    Batch shape — X: {tuple(X_batch.shape)}  y: {tuple(y_batch.shape)}")
 
 
-# ---------------------------------------------------------------------------
-# Quick smoke-test
-# ---------------------------------------------------------------------------
+# SZYBKI TEST +------------------------------------------------------------
 
 if __name__ == "__main__":
     from src.utils.preprocessing import run_preprocessing

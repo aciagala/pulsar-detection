@@ -1,11 +1,11 @@
+# IMPORTOWANIE BIBLIOTEK
 import torch
 import torch.nn as nn
+# CONFIG
 import config
 
 
-# ---------------------------------------------------------------------------
-# Building block
-# ---------------------------------------------------------------------------
+# POJEDYŃCZY BLOK DO SKŁADANIA +---------------------------------------------------
 
 class LinearBlock(nn.Module):
     """
@@ -13,18 +13,21 @@ class LinearBlock(nn.Module):
     and Dropout. Used to build the hidden layers of the MLP.
     """
 
-    def __init__(self, in_features: int, out_features: int, dropout_rate: float, use_batch_norm: bool):
+    def __init__(self, in_features: int, out_features: int, dropout_rate: float, use_batch_norm: bool, use_swish_activation: bool):
         super().__init__()
 
         layers = [nn.Linear(in_features, out_features)]
 
         if use_batch_norm:
-            layers.append(nn.BatchNorm1d(out_features))
+            layers.append(nn.BatchNorm1d(out_features)) # BATCHNORM
 
-        layers.append(nn.ReLU())
+        if use_swish_activation:
+            layers.append(nn.SiLU()) # AKTYWACJA SWISH
+        else:
+            layers.append(nn.ReLU()) # AKTYWACJA RELU
 
         if dropout_rate > 0:
-            layers.append(nn.Dropout(p=dropout_rate))
+            layers.append(nn.Dropout(p=dropout_rate)) # DROPOUT
 
         self.block = nn.Sequential(*layers)
 
@@ -32,9 +35,7 @@ class LinearBlock(nn.Module):
         return self.block(x)
 
 
-# ---------------------------------------------------------------------------
-# MLP
-# ---------------------------------------------------------------------------
+# KLASA SIECI +-----------------------------------------------------------------------
 
 class PulsarMLP(nn.Module):
     """
@@ -64,29 +65,34 @@ class PulsarMLP(nn.Module):
         output_size:    int   = config.OUTPUT_SIZE,
         dropout_rate:   float = config.DROPOUT_RATE,
         use_batch_norm: bool  = config.USE_BATCH_NORM,
+        use_swish_activation: bool = config.USE_SWISH_ACTIVATION,
     ):
         super().__init__()
 
         self.input_size   = input_size
         self.hidden_sizes = hidden_sizes
 
-        # Build hidden layers dynamically from hidden_sizes list
+        # BUDUJE WARSTWY
+        # za pomocą wartości z config
+        # i LinearBlock()
+
         hidden_layers = []
         in_features = input_size
         for out_features in hidden_sizes:
             hidden_layers.append(
-                LinearBlock(in_features, out_features, dropout_rate, use_batch_norm)
+                LinearBlock(in_features, out_features, dropout_rate, use_batch_norm, use_swish_activation)
             )
             in_features = out_features
 
         self.hidden = nn.Sequential(*hidden_layers)
 
-        # Output layer — single logit, no activation
+        # WARSTWA WYJŚCIOWA
         self.output = nn.Linear(in_features, output_size)
 
-        # Weight initialisation
+        # INICJALIZACJA WAG ( zarówno dla ReLU jak i dla Swish ten sam inicjalizator)
         self._init_weights()
 
+    #INICJALIZACJA WAG
     def _init_weights(self) -> None:
         """Kaiming (He) init for ReLU networks — better than default Xavier here."""
         for module in self.modules():
@@ -95,11 +101,13 @@ class PulsarMLP(nn.Module):
                 if module.bias is not None:
                     nn.init.zeros_(module.bias)
 
+    # FORWARD
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Returns raw logits. Shape: (batch_size, 1)."""
         x = self.hidden(x)
         return self.output(x)
 
+    # PREDYKCJA DLA JEDNEGO PRZYKŁADU
     def predict(self, x: torch.Tensor, threshold: float = config.THRESHOLD) -> torch.Tensor:
         """
         Inference helper. Returns binary predictions (0 or 1).
@@ -111,6 +119,7 @@ class PulsarMLP(nn.Module):
             probs  = torch.sigmoid(logits)
             return (probs >= threshold).float()
 
+    # DAJE KLASYFIKACJĘ OBIEKTU DLA JEDNEGO PRZYKŁADU
     def predict_proba(self, x: torch.Tensor) -> torch.Tensor:
         """
         Returns class-1 probabilities. Useful for ROC-AUC and threshold tuning.
@@ -119,6 +128,7 @@ class PulsarMLP(nn.Module):
         with torch.no_grad():
             return torch.sigmoid(self.forward(x))
 
+    # WYPISUJE
     def summary(self) -> None:
         """Print a compact model summary."""
         total     = sum(p.numel() for p in self.parameters())
@@ -135,10 +145,26 @@ class PulsarMLP(nn.Module):
         print(f"{'='*45}\n")
         print(self)
 
+    # ZAPISUJE KSZTAŁT OBECNEGO MODELU
+    def save_model_shape(self) -> None:
+        config.USED_CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
+        with open(config.USED_CONFIGS_DIR/"model_shape.txt","w") as file:
+            total     = sum(p.numel() for p in self.parameters())
+            trainable = sum(p.numel() for p in self.parameters() if p.requires_grad)
 
-# ---------------------------------------------------------------------------
-# Smoke test
-# ---------------------------------------------------------------------------
+            file.write(f"\n{'='*45}\n")
+            file.write(f"  PulsarMLP\n")
+            file.write(f"{'='*45}\n")
+            file.write(f"  Input size    : {self.input_size}\n")
+            file.write(f"  Hidden layers : {self.hidden_sizes}\n")
+            file.write(f"  Output size   : 1  (binary logit)\n")
+            file.write(f"  Total params  : {total:,}\n")
+            file.write(f"  Trainable     : {trainable:,}\n")
+            file.write(f"{'='*45}\n\n")
+            file.write(str(self))
+
+
+# SZYBKI TEST +------------------------------------------------------------
 
 if __name__ == "__main__":
     model = PulsarMLP()

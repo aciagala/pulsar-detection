@@ -1,7 +1,11 @@
+# IMPORTOWANIE BIBLIOTEK
 import torch
 import random
 import numpy as np
+# CONFIG
 import config
+
+# UŻYCIE FUNKCJI ZDEFINIOWANYCH PRZEZ NAS
 from src.utils.preprocessing import run_preprocessing
 from src.dataset.dataset import get_dataloaders
 from src.model.mlp import PulsarMLP
@@ -10,9 +14,7 @@ from src.evaluation.metrics import evaluate_model, find_best_threshold, print_me
 from src.utils.visualization import plot_all
 
 
-# ---------------------------------------------------------------------------
-# Reproducibility
-# ---------------------------------------------------------------------------
+# USTAWIANIE LOSOWOŚCI +------------------------------------------------------
 
 def set_seed(seed: int = config.SEED) -> None:
     random.seed(seed)
@@ -23,38 +25,39 @@ def set_seed(seed: int = config.SEED) -> None:
     torch.backends.cudnn.benchmark     = False
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+# MAIN +---------------------------------------------------------------------+ MAIN #
 
 def main() -> None:
     set_seed()
 
-    # ------------------------------------------------------------------
-    # 1. Preprocessing
-    # ------------------------------------------------------------------
+    config.SaveConfigs()
+
+    # PREPROCESSING +--------------------------------------------------------
+    # za pomocą run_preprocessing() z src/utils/preprocessing
+
     print("\n[1/5] Preprocessing...")
     data = run_preprocessing()
 
-    # ------------------------------------------------------------------
-    # 2. DataLoaders
-    # ------------------------------------------------------------------
+    # DATALOADER +-----------------------------------------------------------
+    # za pomocą get_dataloaders z src/dataset/dataset
+
     print("\n[2/5] Building DataLoaders...")
     train_loader, val_loader = get_dataloaders(
         data["X_train"], data["y_train"],
         data["X_val"],   data["y_val"],
     )
 
-    # ------------------------------------------------------------------
-    # 3. Model
-    # ------------------------------------------------------------------
+    # MODEL +----------------------------------------------------------------
+    # za pomocą PulsarMLP z src/model/mlp
+
     print("\n[3/5] Building model...")
     model = PulsarMLP()
     model.summary()
+    model.save_model_shape();
 
-    # ------------------------------------------------------------------
-    # 4. Training
-    # ------------------------------------------------------------------
+    # TRENOWANIE +-----------------------------------------------------------
+    # za pomocą Trainer z src/training/trainer
+
     print("\n[4/5] Training...")
     trainer = Trainer(
         model        = model,
@@ -64,28 +67,27 @@ def main() -> None:
     )
     history = trainer.fit()
 
-    # ------------------------------------------------------------------
-    # 5. Evaluation
-    # ------------------------------------------------------------------
+    # EWALUACJA +------------------------------------------------------------
+
+    # próba ustawienia urządzenia na gpu
     print("\n[5/5] Evaluating best model...")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # zapisz pierwszy model jako najlepszy
     best_model = load_best_model(PulsarMLP()).to(device)
     metrics    = evaluate_model(best_model, val_loader, device)
-
     print_metrics(metrics, split="Validation")
 
-    # Threshold tuning — may improve F1 further
-    best_thresh, best_f1 = find_best_threshold(
-        metrics["y_true"],
-        metrics["y_probs"],
-    )
+    # sprawdzanie najlepszego treshold'a
+    # za pomocą find_best_treshold z src/evaluation/metrics
+
+    best_thresh, best_f1 = find_best_threshold( metrics["y_true"] , metrics["y_probs"], )
     if best_thresh != config.THRESHOLD:
         print(f"\n[!] Consider updating config.THRESHOLD from "
               f"{config.THRESHOLD} to {best_thresh} "
               f"(F1: {metrics['f1']:.4f} → {best_f1:.4f})")
 
-    # Plots
+    # wykres historii
     plot_all(history, metrics)
 
     print("\n[✓] Done. Outputs saved to:", config.OUTPUTS_DIR)

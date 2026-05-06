@@ -1,13 +1,13 @@
+# IMPORTOWANIE BIBLIOTEK
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from sklearn.metrics import roc_curve, auc
+# CONFIG
 import config
 
 
-# ---------------------------------------------------------------------------
-# Shared style
-# ---------------------------------------------------------------------------
+# USTALAMY WSPÓLNY STYL +-------------------------------------------------------
 
 STYLE = {
     "figure.facecolor": "white",
@@ -18,7 +18,7 @@ STYLE = {
     "axes.spines.right": False,
 }
 
-
+# ZAPISUJE JAKO PNG
 def _save(fig: plt.Figure, filename: str) -> None:
     config.PLOTS_DIR.mkdir(parents=True, exist_ok=True)
     path = config.PLOTS_DIR / filename
@@ -26,9 +26,7 @@ def _save(fig: plt.Figure, filename: str) -> None:
     print(f"[✓] Plot saved → {path}")
 
 
-# ---------------------------------------------------------------------------
-# Loss curve
-# ---------------------------------------------------------------------------
+# FUNKCJA STRATY +-------------------------------------------------------------
 
 def plot_loss_curve(history: dict, save: bool = True) -> plt.Figure:
     """
@@ -60,9 +58,7 @@ def plot_loss_curve(history: dict, save: bool = True) -> plt.Figure:
     return fig
 
 
-# ---------------------------------------------------------------------------
-# Metrics curve
-# ---------------------------------------------------------------------------
+# KRZYWA METRYK +-----------------------------------------------------------------
 
 def plot_metrics_curve(history: dict, save: bool = True) -> plt.Figure:
     """
@@ -96,9 +92,7 @@ def plot_metrics_curve(history: dict, save: bool = True) -> plt.Figure:
     return fig
 
 
-# ---------------------------------------------------------------------------
-# Confusion matrix
-# ---------------------------------------------------------------------------
+# CONFUSION MATRIX (TABLICA POMYŁEK) +----------------------------------------------
 
 def plot_confusion_matrix(
     cm:         np.ndarray,
@@ -146,9 +140,7 @@ def plot_confusion_matrix(
     return fig
 
 
-# ---------------------------------------------------------------------------
-# ROC curve
-# ---------------------------------------------------------------------------
+# KRZYWA ROC +--------------------------------------------------------------------------
 
 def plot_roc_curve(
     y_true:  np.ndarray,
@@ -186,9 +178,7 @@ def plot_roc_curve(
     return fig
 
 
-# ---------------------------------------------------------------------------
-# Convenience: plot everything at once
-# ---------------------------------------------------------------------------
+# STWÓRZ WSZYSTKIE WYKRESY +--------------------------------------------------------
 
 def plot_all(history: dict, metrics: dict) -> None:
     """
