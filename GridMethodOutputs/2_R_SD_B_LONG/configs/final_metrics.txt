@@ -1,0 +1,23 @@
+
+==================================================
+  Validation Results
+==================================================
+  F1        : 0.9180
+  Precision : 0.9409
+  Recall    : 0.8961
+  ROC-AUC   : 0.9858
+
+  Confusion Matrix:
+              Pred 0   Pred 1
+  Actual 0  :   2262       13   (TN / FP)
+  Actual 1  :     24      207   (FN / TP)
+
+              precision    recall  f1-score   support
+
+   Noise (0)       0.99      0.99      0.99      2275
+  Pulsar (1)       0.94      0.90      0.92       231
+
+    accuracy                           0.99      2506
+   macro avg       0.97      0.95      0.95      2506
+weighted avg       0.99      0.99      0.99      2506
+
