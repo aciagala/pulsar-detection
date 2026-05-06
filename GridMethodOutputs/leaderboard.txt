@@ -1,0 +1,30 @@
+
+150 EPOK, PATIENCE = 50, LEARNING RATE 1e-4:
+2_R_NB_B - 0.9124		     2
+2_R_NB_Z - 0.9087		 6
+2_R_SD_B - 0.9131		      1
+3_R_NB_B - 0.9120		    3
+3_R_NB_Z - 0.9124		     2
+3_R_SD_B - 0.9103		   4
+3_R_SN_B - 0.8504		8
+3_S_NB_B - 0.9058	   7
+4_R_NB_B - 0.9120		    3
+4_R_NB_Z - 0.9099		  5
+4_R_SD_B - 0.9099		  5
+
+150 EPOK, PATIENCE = 50, LEARNING RATE 5e-5:
+4_R_NB_Z_COMPUTER_DESTROYER - 0.9095
+4_R_SD_Z_COMPUTER_DESTROYER - 0.9111
+
+300 EPOK, PATIENCE = 100, LEARNING RATE 5e-5:
+2_R_SD_B_LONG - 0.9180 (NAJWY¯SZY WYNIK)
+2_R_NB_B_LONG - 0.9124
+3_R_NB_Z_LONG - 0.9099
+
+350 EPOK, PATIENCE = 100, LEARNING RATE 1e-5:
+2_R_SD_B_LONG - 0.8859
+
+2/3/4 - liczba warstw - [64,64] / [64,32,16] / [64, 32 ,32, 16]
+R/S - aktywacja  - ReLU / Swish
+NB/SD/SN - preprocessing - shuffle/distribute equally + reuse samples/distribute equally without reusing
+B/Z - addidional marking feature - with/without

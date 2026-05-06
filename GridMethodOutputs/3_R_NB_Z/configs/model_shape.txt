@@ -1,0 +1,40 @@
+
+=============================================
+  PulsarMLP
+=============================================
+  Input size    : 9
+  Hidden layers : [64, 32, 16]
+  Output size   : 1  (binary logit)
+  Total params  : 3,489
+  Trainable     : 3,489
+=============================================
+
+PulsarMLP(
+  (hidden): Sequential(
+    (0): LinearBlock(
+      (block): Sequential(
+        (0): Linear(in_features=9, out_features=64, bias=True)
+        (1): BatchNorm1d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Dropout(p=0.3, inplace=False)
+      )
+    )
+    (1): LinearBlock(
+      (block): Sequential(
+        (0): Linear(in_features=64, out_features=32, bias=True)
+        (1): BatchNorm1d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Dropout(p=0.3, inplace=False)
+      )
+    )
+    (2): LinearBlock(
+      (block): Sequential(
+        (0): Linear(in_features=32, out_features=16, bias=True)
+        (1): BatchNorm1d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+        (2): ReLU()
+        (3): Dropout(p=0.3, inplace=False)
+      )
+    )
+  )
+  (output): Linear(in_features=16, out_features=1, bias=True)
+)

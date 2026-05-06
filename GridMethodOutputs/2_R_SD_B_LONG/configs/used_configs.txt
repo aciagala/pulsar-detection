@@ -1,0 +1,30 @@
+SEED: 67
+MARK_FILLED_SAMPLES: False
+VAL_SIZE: 0.2
+FEATURE_COLUMNS: [' Mean of the integrated profile', ' Standard deviation of the integrated profile', ' Excess kurtosis of the integrated profile', ' Skewness of the integrated profile', ' Mean of the DM-SNR curve', ' Standard deviation of the DM-SNR curve', ' Excess kurtosis of the DM-SNR curve', ' Skewness of the DM-SNR curve']
+
+TARGET_COLUMN:target_class
+BATCH_SIZE: 64
+NUM_WORKERS: 0
+PIN_MEMORY: False
+REPEAT_SAMPLES: True
+
+INPUT_SIZE: 8
+HIDDEN_SIZES: [64, 64]
+OUTPUT_SIZE: 1
+DROPOUT_RATE: 0.3
+USE_BATCH_NORM: True
+USE_SWISH_ACTIVATION: False
+
+LEARNING_RATE: 0.0005
+WEIGHT_DECAY: 0.0001
+NUM_EPOCHS: 300
+PATIENCE: 100
+THRESHOLD: 0.8
+
+IMBALANCE_STRATEGY: sampler
+POS_WEIGHT_OVERRIDE: None
+
+EVAL_METRICS: ['f1', 'precision', 'recall', 'roc_auc']
+MONITOR_METRIC: f1
+
